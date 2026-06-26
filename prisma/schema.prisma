@@ -1,0 +1,118 @@
+
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MediaType {
+  MOVIE
+  TV_SHOW
+  BOOK
+}
+
+enum Status {
+  WATCHLIST
+  IN_PROGRESS
+  COMPLETED
+  DROPPED
+}
+
+model User {
+  id String @id @default(cuid())
+
+  username  String @unique
+
+  name String?
+  bio String?
+
+  profilePicture  String?
+  profileBanner String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  medias Media[]
+  journals Journal[]
+  collections Collection[]
+}
+
+model Media {
+  id String @id @default(cuid())
+  title String
+  type MediaType
+  poster String?
+  description String?
+  releasedYear Int?
+  status Status
+  rating Int
+  favourite Boolean @default(false)
+  review String?
+  notes String?
+
+  finishedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  collectionsItems CollectionItem[]
+
+  @@unique([userId])
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([userId, status])
+  @@index([userId, type])
+
+}
+
+model Journal {
+  id String @id @default(cuid())
+
+  heading String?
+
+  content String
+
+  createdAt DateTime @default(now())
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Collection {
+  id String @id @default(cuid())
+
+  name String
+
+  createdAt DateTime @default(now())
+
+  userId String
+  user User @relation(fields: [userId], references: [id])
+
+  items CollectionItem[]
+
+  @@index([userId])
+}
+
+model CollectionItem {
+  id String @id @default(cuid())
+
+  collectionId String
+  mediaId String
+
+  collection Collection @relation(fields: [collectionId], references: [id])
+
+  media Media @relation(fields: [mediaId], references: [id])
+
+  @@unique([collectionId, mediaId])
+  @@index([collectionId])
+  @@index([mediaId])
+}
