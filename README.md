@@ -112,16 +112,3 @@ Examples:
 * ✅ Delete Account
 
 ```
-
-```bash
-V2
-TMDb integration
-Google Books integration
-Rich editor for journal/reviews
-Calendar view ("What I watched on this date")
-Year in Review (your personal wrapped)
-Custom tags (e.g., "Rainy Day", "Date Night")
-Data export/import
-Mobile app
-Offline support
-```

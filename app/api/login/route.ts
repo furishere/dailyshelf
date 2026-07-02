@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { loginSchema } from "@/validations/auth"
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
+import { cookies } from "next/headers"
 
 export async function POST(
     req:Request
@@ -11,6 +12,7 @@ export async function POST(
         const body = await req.json()
 
         const parsedBody = loginSchema.safeParse(body)
+        
         if(!parsedBody.success){
             return Response.json({
             message : "invalid input",
@@ -25,19 +27,20 @@ export async function POST(
         const user = await prisma.user.findUnique({
             where : {
                 email
-            }, 
+            }
         })
 
         if(!user){
             return Response.json({
-                message : "user not exists"
+                message : "Invalid Credentials"
             },{
                 status : 401
             })
         }
 
-        const isPassword = await bcrypt.compare(password, user.password)
-        if(!isPassword){
+        const isPasswordCorrect = await bcrypt.compare(password, user.password)
+
+        if(!isPasswordCorrect){
             return Response.json({
                 message : "invalid credentials"
             },{
@@ -46,13 +49,23 @@ export async function POST(
         }
 
         const token = jwt.sign({
-            id:user.id
+            userId:user.id
         },JWT_USER_SECRET!,{
             expiresIn : "30d"
         })
 
-        const response =  Response.json({
-            message : "Login Sucessfull",
+        const cookieStore = await cookies()
+
+        cookieStore.set("token", token, {
+            httpOnly : true,
+            secure : process.env.NODE_ENV === "production",
+            sameSite : "lax",
+            maxAge : 60 * 60 * 24 * 30,
+            path : "/"
+        })
+
+        return Response.json({
+            message : "Login Successful",
             user : {
                 id : user.id,
                 username : user.username,
@@ -61,13 +74,6 @@ export async function POST(
         },{
             status : 200
         })
-
-        response.headers.append(
-            "Set-Cookie",
-            `token=${token}; HttpOnly; Path=/; Max-Age=2592000; SameSite=Lax`
-        )
-
-        return response
 
     }catch(error){
         console.error(error)

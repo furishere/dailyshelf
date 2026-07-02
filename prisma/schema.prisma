@@ -43,10 +43,20 @@ model User {
 
 model Media {
   id String @id @default(cuid())
+
+  tmbdId Int?
+  googleBooksId String?
+  ImbdId String?
+
   title String
+  originalTitle String?
+
   type MediaType
-  poster String?
+
   description String?
+
+  poster String?
+
   releasedYear Int?
   status Status
   rating Int
