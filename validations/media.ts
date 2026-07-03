@@ -1,9 +1,9 @@
 import {z} from "zod"
 
 export const mediaSchema = z.object({
-    tmbId:z.number().int().positive().optional(),
+    tmdbId:z.number().int().positive().optional(),
     googleBookId: z.string().trim().optional(),
-    imbdId : z.string().trim().optional(),
+    imdbId : z.string().trim().optional(),
 
     title: z.string().trim().min(1).max(200),
     originalTitle : z.string().trim().optional(),
@@ -49,3 +49,5 @@ export const mediaSchema = z.object({
     finishedAt: z.coerce.date().optional()
 
 })
+
+export type MediaSchema = z.infer<typeof mediaSchema>
